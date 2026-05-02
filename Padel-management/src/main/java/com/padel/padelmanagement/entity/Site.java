@@ -16,11 +16,11 @@ public class Site {
     private Long id;
 
     @Column(name = "Nom_Site",nullable = false, length = 100)
-    private String Nom_Site;
+    private String nomSite;
 
     @Column(name = "Heure_Ouverture")
-    private LocalTime Heure_Ouverture;
+    private LocalTime heureOuverture;
 
     @Column(name = "Heure_Fermeture")
-    private LocalTime Heure_Fermeture;
+    private LocalTime heureFermeture;
 }
