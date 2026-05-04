@@ -18,4 +18,9 @@ public class MembreService {
     public List<Membre>getAllMembre(){
         return membreRepository.findAll();
     }
+
+    //la méthode prend mon objet Java et génère une requête SQL
+    public Membre createMembre(Membre membre){
+        return membreRepository.save(membre);
+    }
 }
