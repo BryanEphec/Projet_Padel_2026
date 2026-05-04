@@ -1,0 +1,11 @@
+### Créer un nouveau membre
+POST http://localhost:8080/api/Membre
+Content-Type: application/json
+
+{
+  "matricule": "M1234",
+  "nom": "Dupont",
+  "prenom": "Jean",
+  "typeMembre": "Standard",
+  "idSite": 1
+}
