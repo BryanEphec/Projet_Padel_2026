@@ -13,7 +13,7 @@ public class Membre {
 
     @Id
     @Column(name = "Matricule")
-    private Long matricule;
+    private String matricule;
 
     @Column(name = "Nom", nullable = false)
     private String nom;
