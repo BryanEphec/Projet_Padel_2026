@@ -1,11 +1,50 @@
-### Créer un nouveau membre
+
+### Scénario 1.1 : ÉCHEC - Tenter d'ajouter un membre SANS Token
+### Attendu : 401 Unauthorized (L'accès est refusé immédiatement)
 POST http://localhost:8080/api/Membre
 Content-Type: application/json
 
 {
-  "matricule": "M1234",
-  "nom": "Dupont",
-  "prenom": "Jean",
+  "matricule": "M9999",
+  "nom": "Test",
+  "prenom": "Securite",
+  "typeMembre": "Standard"
+}
+
+###
+
+### Scénario 1.2 : ÉCHEC - Tenter d'ajouter un membre avec un mauvais Token
+### Attendu : 403 Forbidden (Le token existe mais n'a pas les droits ADMIN)
+POST http://localhost:8080/api/Membre
+Content-Type: application/json
+Authorization: Bearer mock-wrong-token-user
+
+{
+  "matricule": "M9999",
+  "nom": "Test",
+  "prenom": "Securite",
+  "typeMembre": "Standard"
+}
+
+###
+
+### Scénario 1.3 : SUCCÈS - Ajouter un membre avec le Token ADMIN valide
+### Attendu : 201 Created (Le membre est enregistré dans PadelDB)
+POST http://localhost:8080/api/Membre
+Content-Type: application/json
+Authorization: Bearer mock-pdw-token-admin
+
+{
+  "matricule": "M9999",
+  "nom": "Test",
+  "prenom": "Securite",
   "typeMembre": "Standard",
   "idSite": 1
 }
+
+
+
+### Récupérer la liste complète des membres de la base de données
+### Attendu : 200 OK (Retourne un tableau JSON accessible par le Frontend)
+GET http://localhost:8080/api/Membre
+Accept: application/json
