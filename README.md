@@ -1,6 +1,6 @@
 Projet Padel Management 2026 - Dossier d'Architecture & d'Exploitation
 
-1. Dossier d'Architecture
+## 1. Dossier d'Architecture
 
 L'application respecte une architecture web découplée en couches (N-Tier Architecture), garantissant la séparation des responsabilités.
 
