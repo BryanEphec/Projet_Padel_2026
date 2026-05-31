@@ -1,9 +1,11 @@
 package com.padel.padelmanagement.entity;
 
+
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 @Entity
 @Table(name = "[Match]") // Les crochets sont VITALES ici pour SQL Server
 public class Match {
@@ -14,9 +16,11 @@ public class Match {
     private Long idMatch;
 
     @Column(name = "DateMatch")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateMatch;
 
     @Column(name = "HeureDebut")
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime heureDebut;
 
     @Column(name = "EstPrive")
@@ -41,4 +45,9 @@ public class Match {
 
     public Terrain getTerrain() { return terrain; }
     public void setTerrain(Terrain terrain) { this.terrain = terrain; }
+    @Column(name = "DateHeure")
+    private java.time.LocalDateTime dateHeure;
+
+    public java.time.LocalDateTime getDateHeure() { return dateHeure; }
+    public void setDateHeure(java.time.LocalDateTime dateHeure) { this.dateHeure = dateHeure; }
 }

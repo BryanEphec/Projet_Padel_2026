@@ -1,49 +1,181 @@
-<main class="min-h-screen bg-gray-50 p-8 font-sans">
+<div *ngIf="!currentUser()" class="min-h-screen bg-gray-50 flex items-center justify-center p-8 font-sans">
+  <div class="max-w-4xl w-full flex flex-col md:flex-row gap-8 items-center">
+
+    <div class="md:w-1/2 space-y-4">
+      <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">Padel Brussels</h1>
+      <p class="text-xl text-gray-500">Réservez vos terrains en quelques secondes, rejoignez des matchs publics et gérez votre classement.</p>
+    </div>
+
+    <div class="md:w-1/2 w-full space-y-6">
+
+      <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+        <h2 class="text-2xl font-bold mb-4">Déjà membre ?</h2>
+        <div class="flex gap-2">
+          <input type="text" [(ngModel)]="loginData.matricule" placeholder="Votre Matricule (ex: M7777)" class="flex-1 rounded-lg border-gray-300 p-3 border focus:ring-2 focus:ring-blue-500 outline-none">
+          <button (click)="login()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 rounded-lg transition-colors">Entrer</button>
+        </div>
+      </div>
+
+      <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+        <h2 class="text-2xl font-bold mb-4">Nouveau joueur ?</h2>
+        <div class="space-y-4">
+          <input type="text" [(ngModel)]="registerData.prenom" placeholder="Prénom" class="w-full rounded-lg border-gray-300 p-3 border focus:ring-2 focus:ring-green-500 outline-none">
+          <input type="text" [(ngModel)]="registerData.nom" placeholder="Nom" class="w-full rounded-lg border-gray-300 p-3 border focus:ring-2 focus:ring-green-500 outline-none">
+          <button (click)="register()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">Créer mon compte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main *ngIf="currentUser()" class="min-h-screen bg-gray-50 p-8 font-sans">
   <div class="max-w-4xl mx-auto">
+
     <header class="mb-8 flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Padel Management</h1>
-        <p class="text-gray-500 mt-1">Gestion des membres et des réservations</p>
+        <p class="text-blue-600 font-medium mt-1">Connecté en tant que {{ currentUser().prenom }} ({{ currentUser().matricule }})</p>
       </div>
-      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
-        + Nouveau Match
-      </button>
+      <div class="flex gap-4">
+        <button (click)="toggleAdmin()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
+          {{ showAdmin() ? 'Fermer Stats' : 'Vue Admin (Stats)' }}
+        </button>
+
+        <button *ngIf="!showAdmin()" (click)="toggleForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
+          {{ showForm() ? 'Annuler' : '+ Nouveau Match' }}
+        </button>
+
+        <button (click)="logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
+          Déconnexion
+        </button>
+      </div>
     </header>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div *ngIf="showForm()" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Réserver un Terrain</h2>
+
+      <form (ngSubmit)="reserverMatch()" class="space-y-4">
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mon Matricule</label>
+          <input type="text" [(ngModel)]="newMatch.matriculeOrganisateur" name="matricule" required readonly
+                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border bg-gray-100 text-gray-500 cursor-not-allowed">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Choisir un Terrain</label>
+          <select [(ngModel)]="newMatch.idTerrain" name="terrain" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+            <option value="" disabled selected>-- Sélectionnez un terrain --</option>
+            <option *ngFor="let t of terrains()" [value]="t.idTerrain">
+              {{ t.nomTerrain }}
+            </option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Date du match</label>
+            <input type="date" [(ngModel)]="newMatch.dateMatch" name="date" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Heure de début</label>
+            <input type="time" [(ngModel)]="newMatch.heureDebut" name="heure" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Visibilité</label>
+          <select [(ngModel)]="newMatch.estPrive" name="prive" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+            <option [ngValue]="true">Match Privé</option>
+            <option [ngValue]="false">Match Public</option>
+          </select>
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg mt-6">
+          Confirmer la réservation (60 €)
+        </button>
+      </form>
+    </div>
+
+    <div *ngIf="showAdmin()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-purple-500">
+          <p class="text-sm font-medium text-gray-500 uppercase">Chiffre d'Affaires</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ getChiffreAffaires() }} €</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+          <p class="text-sm font-medium text-gray-500 uppercase">Total Réservations</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ matchs().length }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-green-500">
+          <p class="text-sm font-medium text-gray-500 uppercase">Membres Actifs</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ membres().length }}</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-8">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+          <h2 class="font-semibold text-gray-700">Historique des Réservations</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-gray-600">
+            <thead class="bg-gray-50 text-gray-700">
+            <tr>
+              <th class="px-6 py-3 font-semibold">ID</th>
+              <th class="px-6 py-3 font-semibold">Date & Heure</th>
+              <th class="px-6 py-3 font-semibold">Statut</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+            <tr *ngFor="let m of matchs()" class="hover:bg-gray-50">
+              <td class="px-6 py-4">#{{ m.idMatch }}</td>
+              <td class="px-6 py-4 font-medium">
+                <span *ngIf="m.dateMatch">{{ m.dateMatch }} à {{ m.heureDebut }}</span>
+                <span *ngIf="!m.dateMatch" class="text-gray-400 italic">Date non spécifiée</span>
+              </td>              <td class="px-6 py-4">
+                  <span class="px-2 py-1 rounded-full text-xs font-medium"
+                        [ngClass]="m.estPrive ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'">
+                    {{ m.estPrive ? 'Privé' : 'Public' }}
+                  </span>
+              </td>
+            </tr>
+            <tr *ngIf="matchs().length === 0">
+              <td colspan="3" class="px-6 py-8 text-center text-gray-500">Aucune réservation pour le moment.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!showForm() && !showAdmin()" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
         <h2 class="font-semibold text-gray-700">Membres Inscrits</h2>
       </div>
-
       <ul class="divide-y divide-gray-100">
         @for (membre of membres(); track membre.matricule) {
           <li class="p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+              <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg uppercase">
                 {{ membre.prenom.charAt(0) }}{{ membre.nom.charAt(0) }}
               </div>
-
               <div>
                 <p class="font-bold text-gray-900 text-lg">{{ membre.prenom }} {{ membre.nom }}</p>
                 <div class="flex items-center gap-2 mt-1">
                   <span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
                     {{ membre.matricule }}
                   </span>
-                  <span class="text-sm text-gray-500">Type: {{ membre.typeMembre }}</span>
                 </div>
               </div>
             </div>
-
-            <div *ngIf="membre.sousPenalite > 0" class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
-              Sous pénalité
-            </div>
           </li>
         } @empty {
-          <li class="p-8 text-center text-gray-500">
-            Aucun membre trouvé. Le serveur est-il bien lancé ?
-          </li>
+          <li class="p-8 text-center text-gray-500">Aucun membre trouvé.</li>
         }
       </ul>
     </div>
+
   </div>
 </main>

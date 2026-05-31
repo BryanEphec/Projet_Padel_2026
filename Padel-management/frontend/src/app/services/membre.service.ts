@@ -14,4 +14,8 @@ export class MembreService {
   getMembres(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+  // À ajouter dans MembreService
+  inscrireMembre(membreData: any): Observable<any> {
+    return this.http.post('http://localhost:8080/api/Membres/register', membreData);
+  }
 }

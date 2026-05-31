@@ -47,4 +47,22 @@ public class MembreController {
         Membre createdMembre = membreService.createMembre(membre);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMembre);
     }
+    // 3. ROUTE PUBLIQUE POST : Inscription d'un nouveau joueur (Pas de token requis)
+    @PostMapping("/register")
+    public ResponseEntity<Membre> registerPublic(@RequestBody Membre membre) {
+        // Générer un matricule aléatoire si vide (ex: M4512)
+        if (membre.getMatricule() == null || membre.getMatricule().isEmpty()) {
+            int randomNum = (int)(Math.random() * 9000) + 1000;
+            membre.setMatricule("M" + randomNum);
+        }
+
+        // Valeurs par défaut pour un nouveau joueur
+        membre.setSousPenalite(0);
+        if (membre.getTypeMembre() == null) {
+            membre.setTypeMembre("Standard");
+        }
+
+        Membre createdMembre = membreService.createMembre(membre);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdMembre);
+    }
 }
