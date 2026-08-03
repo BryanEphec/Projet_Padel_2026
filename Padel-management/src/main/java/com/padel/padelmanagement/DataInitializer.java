@@ -61,31 +61,38 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("👉 Site et Terrains (Atomium, Sablon, Uccle, Cinquantenaire) insérés avec succès !");
         }
 
-        // 2. On insère le membre Thomas Lefebvre
+        // 2. On insère le membre Thomas Lefebvre (ROLE_ADMIN)
         if (!membreRepository.existsById("M7777")) {
-            Membre testMembre = new Membre();
-            testMembre.setMatricule("M7777");
-            testMembre.setNom("Lefebvre");
-            testMembre.setPrenom("Thomas");
-            testMembre.setTypeMembre("Standard");
+            Membre adminMembre = new Membre();
+            adminMembre.setMatricule("M7777");
+            adminMembre.setNom("Lefebvre");
+            adminMembre.setPrenom("Thomas");
+            adminMembre.setTypeMembre("Standard");
+            adminMembre.setEmail("admin@padel.be");
+            // Pour l'instant on met le mot de passe en clair, on le hachera à l'étape suivante !
+            adminMembre.setMotDePasse("admin123");
+            adminMembre.setRole("ROLE_ADMIN"); // IMPORTANT
             try {
-                membreRepository.save(testMembre);
-                System.out.println("👉 Membre de test ('Thomas Lefebvre') inséré avec succès !");
+                membreRepository.save(adminMembre);
+                System.out.println("👉 Admin de test ('Thomas Lefebvre') inséré avec succès !");
             } catch (Exception e) {
                 System.out.println("⚠️ Note : L'insertion a échoué pour M7777.");
             }
         }
 
-        // 3. On insère le profil principal
+        // 3. On insère le profil principal (ROLE_USER)
         if (!membreRepository.existsById("C61CCAA")) {
-            Membre myMembre = new Membre();
-            myMembre.setMatricule("C61CCAA");
-            myMembre.setNom("Galvao Coutinho");
-            myMembre.setPrenom("Bryan");
-            myMembre.setTypeMembre("Junior");
+            Membre userMembre = new Membre();
+            userMembre.setMatricule("C61CCAA");
+            userMembre.setNom("Galvao Coutinho");
+            userMembre.setPrenom("Bryan");
+            userMembre.setTypeMembre("Junior");
+            userMembre.setEmail("bryan@padel.be");
+            userMembre.setMotDePasse("password");
+            userMembre.setRole("ROLE_USER"); // IMPORTANT
             try {
-                membreRepository.save(myMembre);
-                System.out.println("👉 Membre Bryan inséré avec succès !");
+                membreRepository.save(userMembre);
+                System.out.println("👉 Joueur Bryan inséré avec succès !");
             } catch (Exception e) {
                 System.out.println("⚠️ Note : L'insertion a échoué pour C61CCAA.");
             }

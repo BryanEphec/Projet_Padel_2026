@@ -28,6 +28,15 @@ public class Membre {
     @Column(name = "SousPenalite")
     private Integer sousPenalite;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "MotDePasse")
+    private String motDePasse;
+
+    @Column(name = "Role")
+    private String role;
+
     // --- GETTERS & SETTERS ---
     public String getMatricule() { return matricule; }
     public void setMatricule(String matricule) { this.matricule = matricule; }
@@ -46,4 +55,17 @@ public class Membre {
 
     public Integer getSousPenalite() { return sousPenalite; }
     public void setSousPenalite(Integer sousPenalite) { this.sousPenalite = sousPenalite; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getMotDePasse() { return motDePasse; }
+
+    public void setMotDePasse(String motDePasse) {
+        this.motDePasse = motDePasse;
+    }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
 }

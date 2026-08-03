@@ -1,22 +1,35 @@
 package com.padel.padelmanagement.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 public class MatchRequest {
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotBlank(message = "Le matricule de l'organisateur est obligatoire")
+    private String matriculeOrganisateur;
+
+    @NotNull(message = "Veuillez sélectionner un terrain")
+    private Long idTerrain;
+
+    @NotNull(message = "La date du match est obligatoire")
+    @FutureOrPresent(message = "Impossible de réserver un terrain dans le passé !") // 🛡️ La magie est ici !
     private LocalDate dateMatch;
 
-    @JsonFormat(pattern = "HH:mm:ss")
+    @NotNull(message = "L'heure de début est obligatoire")
     private LocalTime heureDebut;
 
+    @NotNull
     private Boolean estPrive;
-    private Long idTerrain;
-    private String matriculeOrganisateur;
-    private List<String> autresJoueursMatricules;
+
+    // --- GETTERS & SETTERS ---
+    public String getMatriculeOrganisateur() { return matriculeOrganisateur; }
+    public void setMatriculeOrganisateur(String matriculeOrganisateur) { this.matriculeOrganisateur = matriculeOrganisateur; }
+
+    public Long getIdTerrain() { return idTerrain; }
+    public void setIdTerrain(Long idTerrain) { this.idTerrain = idTerrain; }
 
     public LocalDate getDateMatch() { return dateMatch; }
     public void setDateMatch(LocalDate dateMatch) { this.dateMatch = dateMatch; }
@@ -26,13 +39,4 @@ public class MatchRequest {
 
     public Boolean getEstPrive() { return estPrive; }
     public void setEstPrive(Boolean estPrive) { this.estPrive = estPrive; }
-
-    public Long getIdTerrain() { return idTerrain; }
-    public void setIdTerrain(Long idTerrain) { this.idTerrain = idTerrain; }
-
-    public String getMatriculeOrganisateur() { return matriculeOrganisateur; }
-    public void setMatriculeOrganisateur(String matriculeOrganisateur) { this.matriculeOrganisateur = matriculeOrganisateur; }
-
-    public List<String> getAutresJoueursMatricules() { return autresJoueursMatricules; }
-    public void setAutresJoueursMatricules(List<String> autresJoueursMatricules) { this.autresJoueursMatricules = autresJoueursMatricules; }
 }

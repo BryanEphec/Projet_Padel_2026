@@ -14,8 +14,13 @@ export class MembreService {
   getMembres(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
-  // À ajouter dans MembreService
-  inscrireMembre(membreData: any): Observable<any> {
-    return this.http.post('http://localhost:8080/api/Membres/register', membreData);
+  inscrireMembre(membre: any): Observable<any> {
+    return this.http.post('http://localhost:8080/api/Membres/register', membre);
+  }
+  updateMembre(matricule: string, membreData: any): Observable<any> {
+    return this.http.put(`http://localhost:8080/api/Membres/${matricule}`, membreData);
+  }
+  getHistorique(matricule: string): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:8080/api/Membres/${matricule}/historique`);
   }
 }
