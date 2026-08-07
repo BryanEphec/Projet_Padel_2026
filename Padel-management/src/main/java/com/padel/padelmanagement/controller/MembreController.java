@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import com.padel.padelmanagement.entity.Participation;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 
 @RestController
@@ -20,46 +20,46 @@ import java.util.List;
 public class MembreController {
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private MembreService membreService;
 
-    // 1. ROUTE GET : Récupérer tous les membres
     @GetMapping
     public ResponseEntity<List<Membre>> getAllMembre() {
         return ResponseEntity.ok(membreService.getAllMembre());
     }
 
-    // 2. ROUTE POST STANDARD : Pour la compatibilité si ton Angular appelle simplement /api/Membres
     @PostMapping
     public ResponseEntity<Membre> addMembre(@RequestBody Membre membre) {
-        return registerPublic(membre); // Redirige vers la logique de création ci-dessous
+        return registerPublic(membre);
     }
 
-    // 3. ROUTE PUBLIQUE POST : Inscription d'un nouveau joueur
     @PostMapping("/register")
     public ResponseEntity<Membre> registerPublic(@RequestBody Membre membre) {
-
-        // Générer un matricule aléatoire si vide (ex: M4512)
         if (membre.getMatricule() == null || membre.getMatricule().isEmpty()) {
             int randomNum = (int)(Math.random() * 9000) + 1000;
             membre.setMatricule("M" + randomNum);
         }
 
-        // Valeurs par défaut pour un nouveau joueur
         membre.setSousPenalite(0);
         if (membre.getTypeMembre() == null) {
             membre.setTypeMembre("Standard");
         }
 
-        // 🔥 NOUVEAU : On assigne d'office le rôle "Joueur" pour la sécurité
         membre.setRole("ROLE_USER");
+
+        if (membre.getMotDePasse() != null && !membre.getMotDePasse().isEmpty()) {
+            String motDePasseCrypte = passwordEncoder.encode(membre.getMotDePasse());
+            membre.setMotDePasse(motDePasseCrypte);
+        }
 
         Membre createdMembre = membreService.createMembre(membre);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMembre);
     }
-    // 4. ROUTE PUT : Mettre à jour un membre existant (Réservé à l'admin normalement)
+
     @PutMapping("/{matricule}")
     public ResponseEntity<Membre> updateMembre(@PathVariable String matricule, @RequestBody Membre details) {
-        // On cherche le membre existant
         var membreOpt = membreService.getAllMembre().stream()
                 .filter(m -> m.getMatricule().equals(matricule))
                 .findFirst();
@@ -69,7 +69,6 @@ public class MembreController {
         }
 
         Membre membreAUpdate = membreOpt.get();
-        // On met à jour les champs
         membreAUpdate.setNom(details.getNom());
         membreAUpdate.setPrenom(details.getPrenom());
         membreAUpdate.setEmail(details.getEmail());
@@ -77,14 +76,13 @@ public class MembreController {
         membreAUpdate.setTypeMembre(details.getTypeMembre());
         membreAUpdate.setSousPenalite(details.getSousPenalite());
 
-        // On sauvegarde
-        Membre saved = membreService.createMembre(membreAUpdate); // createMembre fait un "save" donc ça mettra à jour
+        Membre saved = membreService.createMembre(membreAUpdate);
         return ResponseEntity.ok(saved);
     }
+
     @Autowired
     private ParticipationRepository participationRepository;
 
-    // 5. ROUTE GET : Historique détaillé d'un membre
     @GetMapping("/{matricule}/historique")
     public ResponseEntity<?> getHistoriqueJoueur(@PathVariable String matricule) {
         try {
@@ -98,7 +96,6 @@ public class MembreController {
             for (Participation p : participations) {
                 Map<String, Object> info = new HashMap<>();
 
-                // Sécurité absolue : si le match a été mal enregistré, on l'ignore pour ne pas faire planter la boucle
                 if (p.getMatch() == null) continue;
 
                 info.put("idMatch", p.getMatch().getIdMatch());
@@ -107,14 +104,12 @@ public class MembreController {
                 info.put("estOrganisateur", p.getEstOrganisateur());
                 info.put("aPaye", p.getAPaye());
 
-                // Sécurité sur le terrain
                 String nomTerrain = "Terrain inconnu";
                 if (p.getMatch().getTerrain() != null) {
                     nomTerrain = p.getMatch().getTerrain().getNomTerrain();
                 }
                 info.put("terrain", nomTerrain);
 
-                // Recherche des co-joueurs sous protection
                 List<String> autresJoueurs = new ArrayList<>();
                 try {
                     List<Participation> coJoueursPart = participationRepository.findByMatch_IdMatch(p.getMatch().getIdMatch());
@@ -137,9 +132,8 @@ public class MembreController {
 
         } catch (Exception e) {
             System.out.println("🔥 CRASH DANS L'HISTORIQUE :");
-            e.printStackTrace(); // Affiche la ligne exacte de l'erreur dans IntelliJ
+            e.printStackTrace();
 
-            // En renvoyant une réponse "propre" même pour une erreur, Angular ne fera plus d'erreur CORS
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur serveur lors de la récupération de l'historique : " + e.getMessage());
         }

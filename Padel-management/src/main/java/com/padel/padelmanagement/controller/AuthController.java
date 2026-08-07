@@ -6,6 +6,7 @@ import com.padel.padelmanagement.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -23,7 +24,9 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
-    // NOUVELLE CLASSE DTO POUR RECEVOIR LE LOGIN
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public static class LoginRequest {
         public String matricule;
         public String motDePasse;
@@ -35,14 +38,11 @@ public class AuthController {
 
         if (membreOpt.isPresent()) {
             Membre membre = membreOpt.get();
-            // ATTENTION: Normalement on utilise un PasswordEncoder (BCrypt).
-            // Ici on compare en clair car c'est ce qu'on a mis dans DataInitializer.
-            if (membre.getMotDePasse() != null && membre.getMotDePasse().equals(loginRequest.motDePasse)) {
 
-                // Si c'est bon, on génère le token !
+            if (membre.getMotDePasse() != null && passwordEncoder.matches(loginRequest.motDePasse, membre.getMotDePasse())) {
+
                 String jwt = jwtUtils.generateJwtToken(membre.getMatricule(), membre.getRole());
 
-                // On renvoie le token et les infos
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", jwt);
                 response.put("matricule", membre.getMatricule());

@@ -8,6 +8,7 @@ import com.padel.padelmanagement.repository.MatchRepository;
 import com.padel.padelmanagement.repository.MembreRepository;
 import com.padel.padelmanagement.repository.ParticipationRepository;
 import com.padel.padelmanagement.repository.TerrainRepository;
+import com.padel.padelmanagement.service.ReservationService;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class MatchController {
     @Autowired private ParticipationRepository participationRepository;
     @Autowired private MembreRepository membreRepository;
     @Autowired private TerrainRepository terrainRepository;
-
+    @Autowired private ReservationService reservationService;
     @GetMapping
     public ResponseEntity<List<Match>> getAllMatches() {
         return ResponseEntity.ok(matchRepository.findAll());
@@ -34,6 +35,8 @@ public class MatchController {
 
     @PostMapping
     public ResponseEntity<?> createMatch(@Valid @RequestBody MatchRequest request) {
+       reservationService.verifierDroitsSelonMatricule(request.getMatriculeOrganisateur(),request.getDateMatch());
+
         try {
             System.out.println("👉 TENTATIVE DE RÉSERVATION : Date=" + request.getDateMatch() + ", Heure=" + request.getHeureDebut());
 
