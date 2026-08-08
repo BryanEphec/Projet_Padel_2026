@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController // Informe Spring que cette classe est une API qui renvoie du JSON
 @RequestMapping("/api/sites") // Définit l'URL de base : http://localhost:8080/api/sites
-@CrossOrigin(origins = "http://localhost:4200") // Autorise ton futur projet Angular à appeler cette API
+
 public class SiteController {
 
     @Autowired // Branche automatiquement le service (l'injection dont on a parlé)

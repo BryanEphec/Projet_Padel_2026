@@ -20,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/Matches")
-@CrossOrigin(origins = "http://localhost:4200")
+
 public class MatchController {
 
     @Autowired private MatchRepository matchRepository;

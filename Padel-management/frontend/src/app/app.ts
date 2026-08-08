@@ -5,6 +5,7 @@ import { MembreService } from './services/membre.service';
 import { TerrainService } from './services/terrain.service';
 import { MatchService } from './services/match.service';
 import { AuthService } from './services/auth.service';
+import { HttpClient }  from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -17,14 +18,20 @@ export class AppComponent implements OnInit {
   private terrainService = inject(TerrainService);
   private matchService = inject(MatchService);
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
 
+  // --- NOUVELLES VARIABLES STATS ---
+  totalMembres: number = 0;
+  totalReservations: number = 0;
+  chiffreAffaires: number = 0;
+  private adminUrl = 'http://localhost:8080/api/admin';
   membres = signal<any[]>([]);
   terrains = signal<any[]>([]);
   matchs = signal<any[]>([]);
 
   // Les deux variables pour les historiques
   monHistorique = signal<any[]>([]);
-  matchsPublics = signal<any[]>([]); // NOUVEAU : La liste des matchs à rejoindre
+  matchsPublics = signal<any[]>([]);
 
   showForm = signal<boolean>(false);
   showAdmin = signal<boolean>(false);
@@ -56,7 +63,6 @@ export class AppComponent implements OnInit {
       this.currentUser.set(savedUser);
       this.newMatch.matriculeOrganisateur = savedUser.matricule;
 
-      // On charge les tableaux au démarrage si on est déjà connecté
       this.chargerMonHistorique(savedUser.matricule);
       this.chargerMatchsPublics();
     }
@@ -82,6 +88,18 @@ export class AppComponent implements OnInit {
     });
   }
 
+  chargerStatistiques() {
+    this.http.get<any>(`${this.adminUrl}/stats/membres-count`).subscribe(
+      data => this.totalMembres = data.totalMembres
+    );
+    this.http.get<any>(`${this.adminUrl}/stats/reservations-count`).subscribe(
+      data => this.totalReservations = data.totalReservations
+    );
+    this.http.get<any>(`${this.adminUrl}/stats/chiffre-affaires`).subscribe(
+      data => this.chiffreAffaires = data.chiffreAffaires
+    );
+  }
+
   // --- GESTION DES MEMBRES (ADMIN) ---
 
   voirDetails(membre: any) {
@@ -105,23 +123,20 @@ export class AppComponent implements OnInit {
 
   sauvegarderMembre() {
     this.membreService.updateMembre(this.selectedMembre().matricule, this.selectedMembre()).subscribe({
-      next: (res) => {
+      next: () => {
         alert('Profil mis à jour avec succès !');
         this.editMode.set(false);
         this.membreService.getMembres().subscribe(data => this.membres.set(data));
       },
-      error: (err) => alert("Erreur lors de la mise à jour")
+      error: () => alert("Erreur lors de la mise à jour")
     });
   }
 
   toggleAdmin() {
     this.chargerMatchs();
+    this.chargerStatistiques();
     this.showAdmin.set(!this.showAdmin());
     this.showForm.set(false);
-  }
-
-  getChiffreAffaires() {
-    return this.matchs().length * 60;
   }
 
   // --- CONNEXION & INSCRIPTION ---
@@ -133,11 +148,10 @@ export class AppComponent implements OnInit {
         this.newMatch.matriculeOrganisateur = res.matricule;
         this.loginData.motDePasse = '';
 
-        // On charge les tableaux au moment où on se connecte
         this.chargerMonHistorique(res.matricule);
         this.chargerMatchsPublics();
       },
-      error: (err) => alert("Matricule ou mot de passe incorrect.")
+      error: () => alert("Matricule ou mot de passe incorrect.")
     });
   }
 
@@ -152,7 +166,7 @@ export class AppComponent implements OnInit {
         this.membres.update(m => [...m, newMembre]);
         this.registerData = { nom: '', prenom: '', email: '', motDePasse: '' };
       },
-      error: (err) => alert("Erreur lors de la création du compte.")
+      error: () => alert("Erreur lors de la création du compte.")
     });
   }
 
@@ -188,31 +202,29 @@ export class AppComponent implements OnInit {
     };
 
     this.matchService.creerMatch(payload).subscribe({
-      next: (res) => {
+      next: () => {
         alert("Match réservé avec succès !");
         this.toggleForm();
         this.chargerMatchs();
 
-        // On met à jour les tableaux après avoir créé un match !
         this.chargerMonHistorique(this.currentUser().matricule);
         this.chargerMatchsPublics();
       },
       error: (err) => {
         if (err.status === 400 && err.error) {
-          // Si c'est une erreur de validation (ex: date passée), on affiche le message du serveur
           const messages = Object.values(err.error).join('\n');
           alert("Erreur de saisie :\n" + messages);
         } else {
           alert("Erreur serveur, regarde la console !");
         }
-      }    });
+      }
+    });
   }
 
   rejoindreMatchPublic(idMatch: number) {
     this.matchService.rejoindreMatch(idMatch, this.currentUser().matricule).subscribe({
-      next: (res) => {
+      next: () => {
         alert('Vous avez rejoint le match avec succès !');
-        // On rafraîchit tout pour que l'affichage soit à jour
         this.chargerMonHistorique(this.currentUser().matricule);
         this.chargerMatchsPublics();
         this.chargerMatchs();
@@ -220,7 +232,7 @@ export class AppComponent implements OnInit {
       error: (err) => alert(err.error || "Erreur lors de la tentative de rejoindre le match.")
     });
   }
-  // NOUVEAU : Vérifie si le joueur actuel participe déjà à ce match
+
   suisJeDejaInscrit(idMatch: number): boolean {
     return this.monHistorique().some(match => match.idMatch === idMatch);
   }
