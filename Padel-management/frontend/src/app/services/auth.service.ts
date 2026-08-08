@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -7,33 +7,41 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
-  private http = inject(HttpClient);
+
+  // L'URL de ton backend Spring Boot (ajuste le port si ce n'est pas 8080)
   private apiUrl = 'http://localhost:8080/api/auth';
 
+  constructor(private http: HttpClient) { }
+
+  // 1. Méthode pour se connecter
   login(matricule: string, motDePasse: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { matricule, motDePasse }).pipe(
-      tap((res: any) => {
-        // Dès qu'on reçoit le token, on le sauvegarde dans le navigateur !
-        if (res && res.token) {
-          localStorage.setItem('jwt_token', res.token);
-          // On peut aussi stocker les infos de l'utilisateur pour y accéder facilement
-          localStorage.setItem('user_info', JSON.stringify(res));
-        }
-      })
-    );
+    return this.http.post<any>(`${this.apiUrl}/login`, { matricule, motDePasse })
+      .pipe(
+        tap(response => {
+          // Si on reçoit un token, on le sauvegarde dans le navigateur
+          if (response && response.token) {
+            localStorage.setItem('jwt_token', response.token);
+          }
+        })
+      );
   }
 
-  logout() {
+  // 2. Méthode pour se déconnecter
+  logout(): void {
     localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_info');
   }
 
-  getToken() {
+  // 3. Vérifier si l'utilisateur est connecté (s'il possède un token)
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('jwt_token');
+  }
+
+  // 4. Récupérer le token pour l'ajouter aux futures requêtes
+  getToken(): string | null {
     return localStorage.getItem('jwt_token');
   }
-
-  getUserInfo() {
-    const info = localStorage.getItem('user_info');
-    return info ? JSON.parse(info) : null;
+  // À ajouter dans AuthService
+  getUserInfo(): any {
+    return { prenom: 'Test', role: 'ROLE_USER' };
   }
 }
