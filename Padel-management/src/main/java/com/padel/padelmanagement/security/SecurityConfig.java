@@ -41,7 +41,7 @@ public class SecurityConfig {
                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
                                 // --> L'AJOUT EST ICI : On autorise la connexion ET la création de compte <--
-                                .requestMatchers("/api/auth/**", "/api/Membres/create", "/api/Membres").permitAll()
+                                .requestMatchers("/api/auth/**", "/api/Membres/create", "/api/Membres","/api/terrains/**","/api/Terrains/**").permitAll()
 
                                 .anyRequest().authenticated()
                 )

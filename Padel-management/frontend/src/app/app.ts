@@ -154,6 +154,7 @@ export class AppComponent implements OnInit {
   // --- CONNEXION & INSCRIPTION ---
 
   login() {
+    this.terrainService.getTerrains().subscribe(data => this.terrains.set(data));
     this.authService.login(this.loginData.matricule, this.loginData.motDePasse).subscribe({
       next: (res) => {
         this.currentUser.set(res);
@@ -175,6 +176,7 @@ export class AppComponent implements OnInit {
 
     this.authService.register(this.registerData).subscribe({
       next: (response) => {
+        this.terrainService.getTerrains().subscribe(data => this.terrains.set(data));
         alert('Compte créé avec succès ! Votre matricule est : ' + response.matricule + '\nConnexion en cours...');
 
         // Lancement de la connexion automatique
@@ -218,6 +220,14 @@ export class AppComponent implements OnInit {
   toggleForm() {
     this.showForm.set(!this.showForm());
     this.showAdmin.set(false);
+
+    // 👇 ON S'ASSURE DE CHARGER LES TERRAINS QUAND ON OUVRE LE FORMULAIRE 👇
+    if (this.showForm()) {
+      this.terrainService.getTerrains().subscribe({
+        next: (data) => this.terrains.set(data),
+        error: (err) => console.error("Erreur chargement terrains :", err)
+      });
+    }
   }
 
   reserverMatch() {
