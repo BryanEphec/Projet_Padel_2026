@@ -1,27 +1,60 @@
-Projet Padel Management 2026 - Dossier d'Architecture & d'Exploitation
+Document d Exploitation et de Déploiement - Padel Management
 
-## 1. Dossier d'Architecture
+Ce document détaille l ensemble des étapes nécessaires pour compiler, configurer, exécuter et tester l application Padel Management[cite: 1].
 
-L'application respecte une architecture web découplée en couches (N-Tier Architecture), garantissant la séparation des responsabilités.
+1. Prérequis Système
+Avant de commencer, assurez-vous de disposer des éléments suivants sur votre environnement[cite: 1] :
+- Node.js (v20+) et npm[cite: 1]
+- Java JDK 21+[cite: 1]
+- Docker Desktop (pour la base de données SQL Server)[cite: 1]
+- Maven 3.8+[cite: 1]
 
-### Back-end (Spring Boot)
-* **Version :** Java 21, Spring Boot 4.0.4
-* **Couche Controller :** Expose l'API REST (`/api/Membre`) et intercepte les requêtes HTTP. Gère les codes de statut standard (200, 201, 401, 403).
-* **Couche Service :** Contient la logique métier applicative.
-* **Couche Repository :** Abstraction des accès à la base de données via Spring Data JPA.
-* **Sécurité :** Simulation de contrôle d'accès basé sur des rôles via interception de Token Bearer (Rôles implémentés : Admin / Membre).
+2. Base de Données et Initialisation (Seeding)
 
-### Front-end (Angular)
-* **Version :** Angular 20+
-* **Architecture :** Composants réutilisables, Services centralisés pour les appels HTTP via `HttpClient`, et gestion d'état réactive basée sur les **Angular Signals**.
-
-## 2. Document d'Exploitation & Déploiement
-
-### Prérequis applicatifs
-* Docker Desktop installé et configuré.
-* Aucun script SQL manuel n'est nécessaire (Industrialisation complète).
-
-### Étape 1 : Démarrage de l'infrastructure (Base de données)
-La base de données s'exécute de manière isolée dans un conteneur Docker. Pour la démarrer :
-```bash
+Démarrage de la Base de Données
+Le SGBD s exécute dans un conteneur Docker. Pour lancer la base de données :
 docker compose up -d
+
+Informations de connexion :
+- Hôte : 127.0.0.1
+- Port : 1440
+- Base de données : PadelDB
+- Utilisateur : sa
+
+Jeux de données de test (DataSeeder)
+Au démarrage de l application back-end, la classe DataSeeder initialise automatiquement la base de données si celle-ci est vide (création des terrains et comptes de démonstration)[cite: 1].
+
+3. Procédure de Lancement du Back-end (Spring Boot)
+
+Port par défaut : 8080[cite: 1]
+
+1. Compilation du projet :
+mvn clean install -DskipTests
+
+2. Lancement de l application :
+mvn spring-boot:run
+
+3. Exécution des tests automatisés back-end :
+mvn test[cite: 1]
+
+4. Procédure de Lancement du Front-end (Angular)
+
+Port par défaut : 4200[cite: 1]
+
+1. Installation des dépendances :
+npm install
+
+2. Démarrage du serveur de développement :
+npm start
+
+3. Exécution des tests automatisés front-end :
+npm test[cite: 1]
+
+5. Guide de Démonstration pour l Évaluation
+
+L accès à l application se fait depuis un navigateur web à l adresse : http://localhost:4200
+
+Procédure de test immédiate :
+1. Sur l écran d accueil, utilisez le formulaire "Nouveau Joueur ?" pour créer un compte.
+2. Le système attribue automatiquement un matricule (ex: Sxxxx), effectue la connexion automatique et affiche l espace réservations.
+3. Pour tester l administration, un compte administrateur peut être créé directement ou géré via le rôle ROLE_ADMIN en base de données.
