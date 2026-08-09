@@ -1,13 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { MembreService } from './membre.service';
 
-import { Membre } from './membre.service';
-
-describe('Membre', () => {
-  let service: Membre;
+describe('MembreService', () => {
+  let service: MembreService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Membre);
+    TestBed.configureTestingModule({
+      providers: [
+        MembreService,
+        provideHttpClient()
+      ]
+    });
+    service = TestBed.inject(MembreService);
   });
 
   it('should be created', () => {
