@@ -39,7 +39,13 @@ export class AppComponent implements OnInit {
   currentUser = signal<any>(null);
 
   loginData = { matricule: '', motDePasse: '' };
-  registerData = { nom: '', prenom: '', email: '', motDePasse: '' };
+  // 1. L'objet qui va récupérer ce que l'utilisateur tape dans le HTML
+  registerData = {
+    nom: '',
+    prenom: '',
+    email: '',
+    motDePasse: ''
+  };
 
   newMatch = {
     matriculeOrganisateur: '',
@@ -133,8 +139,14 @@ export class AppComponent implements OnInit {
   }
 
   toggleAdmin() {
+    // On met à jour les matchs et les stats
     this.chargerMatchs();
     this.chargerStatistiques();
+
+    // 👇 LA LIGNE À AJOUTER : On rafraîchit la liste des membres ! 👇
+    this.membreService.getMembres().subscribe(data => this.membres.set(data));
+
+    // On affiche l'interface admin
     this.showAdmin.set(!this.showAdmin());
     this.showForm.set(false);
   }
@@ -155,20 +167,42 @@ export class AppComponent implements OnInit {
     });
   }
 
+
+  // 2. La méthode appelée par le bouton "Créer mon compte"
   register() {
-    if(!this.registerData.nom || !this.registerData.prenom || !this.registerData.email || !this.registerData.motDePasse) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
-    this.membreService.inscrireMembre(this.registerData).subscribe({
-      next: (newMembre) => {
-        alert(`Bienvenue ! Votre matricule est : ${newMembre.matricule}. Gardez-le précieusement !`);
-        this.membres.update(m => [...m, newMembre]);
-        this.registerData = { nom: '', prenom: '', email: '', motDePasse: '' };
+    // On garde le mot de passe en clair de côté pour la connexion automatique
+    const motDePasseSaisi = this.registerData.motDePasse;
+
+    this.authService.register(this.registerData).subscribe({
+      next: (response) => {
+        alert('Compte créé avec succès ! Votre matricule est : ' + response.matricule + '\nConnexion en cours...');
+
+        // Lancement de la connexion automatique
+        this.authService.login(response.matricule, motDePasseSaisi).subscribe({
+          next: (resLogin) => {
+            // Mêmes actions que pour une connexion classique
+            this.currentUser.set(resLogin);
+            this.newMatch.matriculeOrganisateur = resLogin.matricule;
+
+            this.chargerMonHistorique(resLogin.matricule);
+            this.chargerMatchsPublics();
+
+            // On vide les formulaires pour que tout soit propre
+            this.registerData = { nom: '', prenom: '', email: '', motDePasse: '' };
+            this.loginData = { matricule: '', motDePasse: '' };
+          },
+          error: () => {
+            alert("Compte créé, mais la connexion automatique a échoué. Veuillez vous connecter avec votre matricule : " + response.matricule);
+          }
+        });
       },
-      error: () => alert("Erreur lors de la création du compte.")
+      error: (err) => {
+        console.error("Erreur lors de l'inscription :", err);
+        alert("Erreur lors de la création du compte. Vérifiez la console.");
+      }
     });
   }
+
 
   logout() {
     this.authService.logout();
@@ -192,13 +226,14 @@ export class AppComponent implements OnInit {
       heureFormattee += ":00";
     }
 
-    const payload = {
+    const payload: any = {
       dateMatch: this.newMatch.dateMatch,
       heureDebut: heureFormattee,
       estPrive: this.newMatch.estPrive,
       idTerrain: Number(this.newMatch.idTerrain),
       matriculeOrganisateur: this.newMatch.matriculeOrganisateur,
-      autresJoueursMatricules: []
+      autresJoueursMatricules: [],
+      aPaye: true
     };
 
     this.matchService.creerMatch(payload).subscribe({
@@ -235,5 +270,11 @@ export class AppComponent implements OnInit {
 
   suisJeDejaInscrit(idMatch: number): boolean {
     return this.monHistorique().some(match => match.idMatch === idMatch);
+  }
+  // Ajoute cette variable/méthode dans ta classe
+  isAdmin(): boolean {
+    const user = this.authService.getUserInfo();
+    // On vérifie si l'utilisateur existe et si son rôle est bien ADMIN
+    return user && user.role === 'ROLE_ADMIN';
   }
 }

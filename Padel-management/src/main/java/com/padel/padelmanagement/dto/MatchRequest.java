@@ -23,6 +23,10 @@ public class MatchRequest {
 
     @NotNull
     private Boolean estPrive;
+    private Boolean aPaye;
+
+    public Boolean getAPaye() { return aPaye; }
+    public void setAPaye(Boolean aPaye) { this.aPaye = aPaye; }
 
     // --- GETTERS & SETTERS ---
     public String getMatriculeOrganisateur() { return matriculeOrganisateur; }

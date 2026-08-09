@@ -37,9 +37,12 @@
         </p>
       </div>
       <div class="flex gap-4">
-        <button *ngIf="currentUser().role === 'ROLE_ADMIN'" (click)="toggleAdmin()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
-          {{ showAdmin() ? 'Fermer Vue Admin' : 'Vue Admin (Stats)' }}
-        </button>
+        <!-- Le bouton n'apparaîtra que pour l'administrateur -->
+        @if (isAdmin()) {
+          <button (click)="toggleAdmin()">
+            Vue Admin
+          </button>
+        }
 
         <button *ngIf="!showAdmin()" (click)="toggleForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
           {{ showForm() ? 'Annuler' : '+ Nouveau Match' }}

@@ -8,40 +8,54 @@ import { tap } from 'rxjs/operators';
 })
 export class AuthService {
 
-  // L'URL de ton backend Spring Boot (ajuste le port si ce n'est pas 8080)
   private apiUrl = 'http://localhost:8080/api/auth';
-
+  // Modifie cette URL si ta route de création est différente dans Spring Boot (ex: /api/Membres/create)
+  private registerUrl = 'http://localhost:8080/api/Membres';
   constructor(private http: HttpClient) { }
 
-  // 1. Méthode pour se connecter
+  // 1. CONNEXION
   login(matricule: string, motDePasse: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, { matricule, motDePasse })
       .pipe(
         tap(response => {
-          // Si on reçoit un token, on le sauvegarde dans le navigateur
           if (response && response.token) {
             localStorage.setItem('jwt_token', response.token);
+            const userInfo = {
+              matricule: response.matricule || matricule,
+              role: response.role || 'ROLE_USER',
+              prenom: response.prenom || 'Membre'
+            };
+            localStorage.setItem('user_info', JSON.stringify(userInfo));
           }
         })
       );
   }
 
-  // 2. Méthode pour se déconnecter
-  logout(): void {
-    localStorage.removeItem('jwt_token');
+  // 2. INSCRIPTION (La méthode manquante !)
+  register(userData: any): Observable<any> {
+    // On envoie les données du formulaire directement au backend
+    return this.http.post<any>(this.registerUrl, userData);
   }
 
-  // 3. Vérifier si l'utilisateur est connecté (s'il possède un token)
+  // 3. DÉCONNEXION
+  logout(): void {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_info');
+  }
+
   isLoggedIn(): boolean {
     return !!localStorage.getItem('jwt_token');
   }
 
-  // 4. Récupérer le token pour l'ajouter aux futures requêtes
   getToken(): string | null {
     return localStorage.getItem('jwt_token');
   }
-  // À ajouter dans AuthService
+
   getUserInfo(): any {
-    return { prenom: 'Test', role: 'ROLE_USER' };
+    const savedUser = localStorage.getItem('user_info');
+    if (savedUser) {
+      return JSON.parse(savedUser);
+    }
+    return null;
   }
 }

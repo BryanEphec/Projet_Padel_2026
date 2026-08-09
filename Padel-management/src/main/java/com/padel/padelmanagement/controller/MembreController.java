@@ -39,7 +39,7 @@ public class MembreController {
     public ResponseEntity<Membre> registerPublic(@RequestBody Membre membre) {
         if (membre.getMatricule() == null || membre.getMatricule().isEmpty()) {
             int randomNum = (int)(Math.random() * 9000) + 1000;
-            membre.setMatricule("M" + randomNum);
+            membre.setMatricule("S" + randomNum);
         }
 
         membre.setSousPenalite(0);

@@ -69,7 +69,7 @@ public class MatchController {
             org.setMatch(savedMatch);
             org.setMembre(membreOpt.get());
             org.setEstOrganisateur(true);
-            org.setAPaye(false);
+            org.setAPaye(request.getAPaye()!= null ? request.getAPaye(): true);
             participationRepository.save(org);
 
             System.out.println("✅ MATCH CRÉÉ AVEC SUCCÈS !");

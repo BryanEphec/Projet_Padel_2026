@@ -39,7 +39,10 @@ public class SecurityConfig {
                         auth
                                 // --> LA LIGNE INDISPENSABLE POUR LE CORS <--
                                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/api/auth/**").permitAll()
+
+                                // --> L'AJOUT EST ICI : On autorise la connexion ET la création de compte <--
+                                .requestMatchers("/api/auth/**", "/api/Membres/create", "/api/Membres").permitAll()
+
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
