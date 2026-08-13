@@ -1,14 +1,14 @@
-version: '3.8'
+
 
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: padel_sql_server
     ports:
-      - "1440:1433"
+      - "1445:1433"
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrongPassword123!
+      - MSSQL_SA_PASSWORD=NouveauMotDePasse123!
       - MSSQL_PID=Developer
     volumes:
       - mssql_data:/var/opt/mssql
