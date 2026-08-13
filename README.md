@@ -17,19 +17,29 @@ docker compose up -d
 
 Informations de connexion :
 - Hôte : 127.0.0.1
-- Port : 1440
+- Port : 1445
 - Base de données : PadelDB
 - Utilisateur : sa
+- Mot de passe : NouveauMotDePasse123!
 
 Jeux de données de test (DataSeeder)
-Au démarrage de l application back-end, la classe DataSeeder initialise automatiquement la base de données si celle-ci est vide (création des terrains et comptes de démonstration)[cite: 1].
+Au démarrage du back-end, la classe d'initialisation (CommandLineRunner / DataInitializer) génère automatiquement la structure des tables via Hibernate ainsi que les données de démonstration :
 
+Sites de Padel : Atomium, Sablon, Uccle, Cinquantenaire.
+
+Terrains : Terrains associés aux différents sites.
+
+Comptes de démonstration :
+
+Administrateur : Thomas Lefebvre (Rôle ROLE_ADMIN)
+
+Joueur / Membre : Bryan (Rôle ROLE_USER)
 3. Procédure de Lancement du Back-end (Spring Boot)
 
 Port par défaut : 8080[cite: 1]
 
 1. Compilation du projet :
-mvn clean install -DskipTests
+mvn clean install 
 
 2. Lancement de l application :
 mvn spring-boot:run
