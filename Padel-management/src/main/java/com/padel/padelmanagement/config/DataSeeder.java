@@ -1,4 +1,4 @@
-package com.padel.padelmanagement.config; // Modifie le package selon ton architecture
+package com.padel.padelmanagement.config;
 
 import com.padel.padelmanagement.entity.Membre;
 import com.padel.padelmanagement.entity.Terrain;
@@ -54,7 +54,7 @@ public class DataSeeder {
                 System.out.println("🌱 Initialisation des terrains...");
 
                 Terrain t1 = new Terrain();
-                t1.setNomTerrain("Terrain Panoramique 1"); // Adapte le nom du champ selon ton entité Terrain
+                t1.setNomTerrain("Terrain Panoramique 1");
                 terrainRepository.save(t1);
 
                 Terrain t2 = new Terrain();
